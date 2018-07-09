@@ -26,7 +26,7 @@ class AudioVisualizer {
 		~AudioVisualizer() = default;
 
 		int getNumBands() { return numBands; } // getter for number of bands
-		std::vector<Band> getBands() { return bands; } // getter for vector holding Band objects
+		std::vector<Band> & getBands() { return bands; } // getter for vector holding Band objects
 
 		/* pushes Band objects onto Band vector	*/
 		void initializeBandVect() {
