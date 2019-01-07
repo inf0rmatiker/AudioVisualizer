@@ -1,5 +1,6 @@
 # Author: Caleb Carlson
 # Date Created: 1/6/2019
+# Last Edited: 1/7/2019
 
 import pyaudio
 import numpy as np
@@ -8,17 +9,61 @@ import time
 from scipy.fftpack import fft
 import os
 import struct
+from pyqtgraph.Qt import QtGui, QtCore
+import pyqtgraph as pg
 
-RATE = 44100
-CHUNK = 1024
+class AudioVisualizer(object):
+
+	def __init__(self):
+
+		# constants
+		self.RATE = 44100
+		self.CHUNK = 2048
+		self.CHANNELS = 2
+		self.DATA_TYPE = np.int16
+		self.useloopback = True
+		self.deviceIndex = 7
+
+		# members
+		self.p = pyaudio.PyAudio()
+		self.stream = self.p.open(format = pyaudio.paInt16,
+                    channels = self.CHANNELS,
+                    rate = self.RATE,
+                    input = True,
+                    frames_per_buffer = self.CHUNK,
+                    input_device_index = self.deviceIndex,
+                    as_loopback = self.useloopback)
+
+		self.startLoopbackStreaming("wave")
+
+
+	def startLoopbackStreaming(self, graphType="wave"):
+		data = np.frombuffer(self.stream.read(self.CHUNK), dtype=self.DATA_TYPE)
+		data = [element/2**15. for element in data[:len(data)//2]] # normalize between -1 and 1 and cut list in half
+
+		# Plot the raw data
+		plt.plot(data)
+		plt.show()
+		plt.pause(5)
+	
+		plt.close()
+		self.stream.stop_stream()
+		self.stream.close()
+		self.p.terminate()
+
+
 
 def main():
+	av = AudioVisualizer()
+
+	
+
+
+def chooseDevice():
 	print("Audio Visualizer (under development)...")
 
 	device_info = {} 
-	useloopback = False
-
-	p = pyaudio.PyAudio()
+	useloopback = True
 
 	#Set default to first in list or ask Windows
 	try:
@@ -35,7 +80,19 @@ def main():
 		if default_device_index == -1:
 			default_device_index = info["index"]
 
+	#Get input or default
+	device_id = 7
 
+	#Get device info
+	try:
+		device_info = p.get_device_info_by_index(device_id)
+	except IOError:
+		device_info = p.get_device_info_by_index(default_device_index)
+		print ("Selection not available, using default.")
+
+	print("Chosen device index: " + str(device_id))
+	
+	
 
 
 
