@@ -14,7 +14,7 @@ import pyqtgraph as pg
 
 class AudioVisualizer(object):
 
-	def __init__(self):
+	def __init__(self, device_index, pyaudio_object):
 
 		# constants
 		self.RATE = 44100
@@ -22,10 +22,10 @@ class AudioVisualizer(object):
 		self.CHANNELS = 2
 		self.DATA_TYPE = np.int16
 		self.useloopback = True
-		self.deviceIndex = 7
+		self.deviceIndex = device_index
 
 		# members
-		self.p = pyaudio.PyAudio()
+		self.p = pyaudio_object
 		self.stream = self.p.open(format = pyaudio.paInt16,
                     channels = self.CHANNELS,
                     rate = self.RATE,
@@ -54,7 +54,8 @@ class AudioVisualizer(object):
 
 
 def main():
-	av = AudioVisualizer()
+	device_index, p = chooseDevice()
+	av = AudioVisualizer(device_index, p)
 
 	
 
@@ -62,6 +63,7 @@ def main():
 def chooseDevice():
 	print("Audio Visualizer (under development)...")
 
+	p = pyaudio.PyAudio()
 	device_info = {} 
 	useloopback = True
 
@@ -81,7 +83,7 @@ def chooseDevice():
 			default_device_index = info["index"]
 
 	#Get input or default
-	device_id = 7
+	device_id = 7 # For now, default to 7 for testing. // TODO update to user input
 
 	#Get device info
 	try:
@@ -91,10 +93,7 @@ def chooseDevice():
 		print ("Selection not available, using default.")
 
 	print("Chosen device index: " + str(device_id))
-	
-	
-
-
+	return device_id, p
 
 
 if __name__ == '__main__':
